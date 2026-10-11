@@ -281,8 +281,7 @@ function fetchTimelineEvents(options) {
 // =========================================================================
 
 function timelineIsDarkTheme() {
-  return document.documentElement.getAttribute('data-theme') === 'dark'
-    && !(document.body && document.body.classList.contains('lotr-mode'));
+  return document.documentElement.getAttribute('data-theme') === 'dark';
 }
 
 function timelineBucketLabel(ts) {

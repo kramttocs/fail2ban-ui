@@ -119,8 +119,7 @@ function renderInsightsGlobe() {
   countries.forEach(function(s) {
     if (s.count > maxCount) maxCount = s.count;
   });
-  var isDarkTheme = document.documentElement.getAttribute('data-theme') === 'dark'
-    && !(document.body && document.body.classList.contains('lotr-mode'));
+  var isDarkTheme = document.documentElement.getAttribute('data-theme') === 'dark';
   var labelBg = isDarkTheme ? 'rgba(15,23,42,0.92)' : 'rgba(248,250,252,0.97)';
   var labelColor = isDarkTheme ? '#f1f5f9' : '#0f172a';
   var labelBorder = isDarkTheme ? '1px solid rgba(148,163,184,0.25)' : '1px solid rgba(100,116,139,0.35)';
