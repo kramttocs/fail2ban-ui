@@ -252,21 +252,21 @@ const fail2banActionTemplate = `[Definition]
 norestored = 1
 
 # Notifies the UI of a ban; detached so a slow or unreachable UI never delays the next ban.
-actionban = ( event_id="$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')"; /usr/bin/curl__CURL_INSECURE_FLAG__ --fail --silent --show-error --connect-timeout 3 --max-time 8 --retry 2 --retry-delay 1 --retry-max-time 25 --retry-connrefused -X POST '__CALLBACK_URL__/api/ban' \
+actionban = ( event_id="$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')"; logpath='<logpath>'; \
+     logs="$(tac $logpath 2>/dev/null | grep -a <grepopts> -wF '<ip>')"; \
+     [ -z "$logs" ] && logs="$(journalctl --no-pager -r -o cat --since '-1 day' 2>/dev/null | grep -a <grepopts> -wF '<ip>')"; \
+     printf '%%s' "$logs" | LC_ALL=C tr -cd '\11\12\15\40-\176' | \
+     jq -cRs --arg serverId '__SERVER_ID__' \
+             --arg ip '<ip>' \
+             --arg jail '<name>' \
+             --arg hostname '<fq-hostname>' \
+             --arg failures '<failures>' \
+             '{serverId: $serverId, ip: $ip, jail: $jail, hostname: $hostname, failures: $failures, logs: .}' | \
+     /usr/bin/curl__CURL_INSECURE_FLAG__ --fail --silent --show-error --connect-timeout 3 --max-time 8 --retry 2 --retry-delay 1 --retry-max-time 25 --retry-connrefused -X POST '__CALLBACK_URL__/api/ban' \
      -H "Content-Type: application/json" \
      -H 'X-Callback-Secret: __CALLBACK_SECRET__' \
      -H "X-Callback-Event-ID: $event_id" \
-     -d "$(logpath='<logpath>'; \
-           logs="$(tac $logpath 2>/dev/null | grep -a <grepopts> -wF '<ip>')"; \
-           [ -z "$logs" ] && logs="$(journalctl --no-pager -r -o cat --since '-1 day' 2>/dev/null | grep -a <grepopts> -wF '<ip>')"; \
-           logs="$(printf '%%s' "$logs" | LC_ALL=C tr -cd '\11\12\15\40-\176')"; \
-           jq -n --arg serverId '__SERVER_ID__' \
-                 --arg ip '<ip>' \
-                 --arg jail '<name>' \
-                 --arg hostname '<fq-hostname>' \
-                 --arg failures '<failures>' \
-                 --arg logs "$logs" \
-                 '{serverId: $serverId, ip: $ip, jail: $jail, hostname: $hostname, failures: $failures, logs: $logs}')" ) </dev/null >/dev/null 2>&1 &
+     --data-binary @- ) </dev/null >/dev/null 2>&1 &
 
 # Notifies the UI of an unban; detached for the same reason.
 actionunban = ( event_id="$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')"; /usr/bin/curl__CURL_INSECURE_FLAG__ --fail --silent --show-error --connect-timeout 3 --max-time 8 --retry 2 --retry-delay 1 --retry-max-time 25 --retry-connrefused -X POST '__CALLBACK_URL__/api/unban' \

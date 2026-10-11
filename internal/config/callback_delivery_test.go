@@ -18,9 +18,13 @@ package config
 
 import (
 	"context"
+	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
@@ -85,5 +89,56 @@ func TestGeneratedCallbackRetriesKeepEventID(t *testing.T) {
 	defer mu.Unlock()
 	if len(ids) != 2 || len(ids[0]) != 32 || ids[0] != ids[1] {
 		t.Fatalf("retry event IDs: %v", ids)
+	}
+}
+
+func TestGeneratedBanCallbackCarriesLargeLogs(t *testing.T) {
+	for _, tool := range []string{"curl", "jq", "od", "tac"} {
+		if _, err := exec.LookPath(tool); err != nil {
+			t.Skipf("%s is not installed", tool)
+		}
+	}
+	bodies := make(chan []byte, 1)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		bodies <- body
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	logFile := filepath.Join(t.TempDir(), "access.log")
+	line := `{"client":"192.0.2.1","request":"GET /` + strings.Repeat("a", 900) + `","status":404}` + "\n"
+	if err := os.WriteFile(logFile, []byte(strings.Repeat(line, 200)), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	content, err := BuildFail2banActionConfig(server.URL, "test", "test-secret")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, command, ok := strings.Cut(content, "actionban = ")
+	if !ok {
+		t.Fatal("missing actionban")
+	}
+	command, _, _ = strings.Cut(command, "\n\n")
+	command = strings.NewReplacer("<ip>", "192.0.2.1", "<name>", "nginx", "<fq-hostname>", "test-host",
+		"<failures>", "5", "<logpath>", logFile, "<grepopts>", "-m 200", "%%", "%").Replace(command)
+	if output, err := exec.Command("sh", "-c", command).CombinedOutput(); err != nil {
+		t.Fatalf("ban action failed: %v %s", err, output)
+	}
+
+	select {
+	case body := <-bodies:
+		var event struct{ IP, Jail, Logs string }
+		if err := json.Unmarshal(body, &event); err != nil {
+			t.Fatalf("ban callback body is not JSON (%d bytes): %v", len(body), err)
+		}
+		if event.IP != "192.0.2.1" || event.Jail != "nginx" {
+			t.Fatalf("ban callback identity = %s/%s", event.IP, event.Jail)
+		}
+		if len(event.Logs) < 128<<10 {
+			t.Fatalf("ban callback carried %d bytes of logs, want all 200 lines", len(event.Logs))
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("ban callback never arrived")
 	}
 }
