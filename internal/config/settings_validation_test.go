@@ -84,13 +84,19 @@ func TestFail2banActionTemplateRobustness(t *testing.T) {
 		`tac $logpath`,
 		"grep -a",
 		"LC_ALL=C tr -cd '\\11\\12\\15\\40-\\176'",
-		"jq -n",
-		"--arg logs",
+		"jq -cRs",
+		"logs: .}",
+		"--data-binary @-",
 		"journalctl",
 	} {
 		if !strings.Contains(fail2banActionTemplate, want) {
 			t.Fatalf("action template missing %q", want)
 		}
+	}
+	_, ban, _ := strings.Cut(fail2banActionTemplate, "actionban = ")
+	ban, _, _ = strings.Cut(ban, "\n\n")
+	if strings.Contains(ban, "--arg logs") || strings.Contains(ban, `-d "$(`) {
+		t.Fatal("actionban passes logs or the request body as a command-line argument")
 	}
 
 	// The identity fields must be present so a ban is reported even with no logs.
