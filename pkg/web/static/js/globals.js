@@ -33,6 +33,7 @@ var bannedIPsFilterDebounce = null;
 var isBannedSearchLoading = false;
 var bannedSearchRequestToken = 0;
 var bannedSearchPendingCount = 0;
+var manualBlockState = { expanded: false, jail: '', ip: '' };
 var jailBannedState = {};
 var JAIL_BANNED_PAGE_SIZE = 5;
 var JAIL_BANNED_MAX_LIMIT = 100;

@@ -641,6 +641,9 @@ function renderDashboard() {
   if (summary && summary.jails && summary.jails.length > 0) {
     var enabledJails = summary.jails.filter(function(j) { return j.enabled !== false; });
     if (enabledJails.length > 0) {
+      if (!enabledJails.some(function(j) { return j.jailName === manualBlockState.jail; })) {
+        manualBlockState.jail = '';
+      }
       html += ''
         + '<div class="bg-white rounded-lg shadow p-6 mb-6">'
         + '  <div class="cursor-pointer hover:bg-gray-50 -m-6 p-6 rounded-lg transition-colors" onclick="toggleManualBlockSection()">'
@@ -651,27 +654,28 @@ function renderDashboard() {
         + '        <p class="text-xs text-gray-400 mt-1" data-i18n="dashboard.manual_block.expand_hint">Click to expand and block an IP address</p>'
         + '      </div>'
         + '      <div class="ml-4">'
-        + '        <i id="manualBlockToggleIcon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>'
+        + '        <i id="manualBlockToggleIcon" class="fas ' + (manualBlockState.expanded ? 'fa-chevron-up' : 'fa-chevron-down') + ' text-gray-400 transition-transform"></i>'
         + '      </div>'
         + '    </div>'
         + '  </div>'
-        + '  <div id="manualBlockFormContainer" class="hidden" style="margin-top: 35px;">'
+        + '  <div id="manualBlockFormContainer" class="' + (manualBlockState.expanded ? '' : 'hidden') + '" style="margin-top: 35px;">'
         + '    <form id="manualBlockForm" onsubmit="return false;">'
         + '      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">'
         + '        <div>'
         + '          <label for="blockJailSelect" class="block text-sm font-medium text-gray-700 mb-2" data-i18n="dashboard.manual_block.jail_label">Select Jail</label>'
-        + '          <select id="blockJailSelect" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>'
+        + '          <select id="blockJailSelect" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="manualBlockState.jail = this.value" required>'
         + '            <option value="" data-i18n="dashboard.manual_block.jail_placeholder">Choose a jail...</option>';
 
       enabledJails.forEach(function(jail) {
-        html += '            <option value="' + escapeHtml(jail.jailName) + '">' + escapeHtml(jail.jailName) + '</option>';
+        var selected = jail.jailName === manualBlockState.jail ? ' selected' : '';
+        html += '            <option value="' + escapeHtml(jail.jailName) + '"' + selected + '>' + escapeHtml(jail.jailName) + '</option>';
       });
       html += ''
         + '          </select>'
         + '        </div>'
         + '        <div>'
         + '          <label for="blockIPInput" class="block text-sm font-medium text-gray-700 mb-2" data-i18n="dashboard.manual_block.ip_label">IP Address</label>'
-        + '          <input type="text" id="blockIPInput" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" data-i18n-placeholder="dashboard.manual_block.ip_placeholder" placeholder="e.g., 88.76.21.123" required>'
+        + '          <input type="text" id="blockIPInput" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" data-i18n-placeholder="dashboard.manual_block.ip_placeholder" placeholder="e.g., 88.76.21.123" value="' + escapeHtml(manualBlockState.ip) + '" oninput="manualBlockState.ip = this.value" required>'
         + '        </div>'
         + '        <div class="flex items-end">'
         + '          <button type="button" onclick="handleManualBlock()" class="w-full bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors flex items-center justify-center gap-2">'
@@ -1094,8 +1098,8 @@ function toggleManualBlockSection() {
   if (!container || !icon) {
     return;
   }
-  var isHidden = container.classList.contains("hidden");
-  if (isHidden) {
+  manualBlockState.expanded = container.classList.contains("hidden");
+  if (manualBlockState.expanded) {
     container.classList.remove("hidden");
     icon.classList.remove("fa-chevron-down");
     icon.classList.add("fa-chevron-up");
@@ -1133,6 +1137,8 @@ function handleManualBlock() {
   banIP(jail, ip);
   ipInput.value = '';
   jailSelect.value = '';
+  manualBlockState.jail = '';
+  manualBlockState.ip = '';
 }
 
 function renderLogOverviewSection() {
