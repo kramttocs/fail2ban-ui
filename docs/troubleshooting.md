@@ -365,7 +365,7 @@ Events that were stored without log lines keep a grey button. A fix applies to n
 
 1. Verify that alerts are enabled for the event type (ban and/or unban) under **Settings -> Alert Settings**. New installations start with alerts disabled.
 2. Check which alert provider is selected, and re-check all settings of the active provider. The email provider needs a destination address, an SMTP host, and a sender address; without them the UI skips email alerts and logs a warning.
-3. Check the country filter: if specific countries are selected, only IPs geolocated to those countries trigger alerts. Set it to `ALL` to alert on every event. The `LOTR` entry only switches the theme and is ignored by the filter.
+3. Check the country filter: if specific countries are selected, only IPs geolocated to those countries trigger alerts. Set it to `ALL` to alert on every event.
 4. Confirm the dispatch in the Fail2Ban UI logs (enable debug logging for more detail):
 
 ```bash
