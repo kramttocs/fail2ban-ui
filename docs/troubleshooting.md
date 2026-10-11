@@ -45,12 +45,25 @@ Check:
 
 * The `jq` package is installed on the host.
 * Fail2Ban is running and the socket exists.
-* The container has the socket mounted.
+* The container has the socket directory mounted, not the socket file itself.
 * Permissions allow access to the socket.
 * SELinux is not denying access.
 * The configuration path contains the complete Fail2Ban configuration, not only custom files.
 
 If the log shows `configuration validation failed` with `Found no accessible config files`, Fail2Ban UI cannot see the complete configuration. Before it applies a change, Fail2Ban UI validates the configuration path with `fail2ban-client -t`. That path must contain `fail2ban.conf`, `jail.conf` and the stock `action.d` and `filter.d` files. Mount the directory that holds the configuration the daemon actually loads. For containerised Fail2Ban, use an image that keeps this tree in a host directory, such as linuxserver/fail2ban. See [Container deployment](../deployment/container/README.md#all-in-one-setup-fail2ban--fail2ban-ui).
+
+If the socket disappears from the container after Fail2Ban restarts on the host, while it still exists on the host, systemd recreated the socket directory. A bind mount keeps pointing at the old, deleted directory, so the container sees it empty. This happens when `/run/fail2ban` is a systemd runtime directory, as with newer Fail2Ban versions that ship a `fail2ban.socket` unit. Check the units on the host:
+
+```bash
+systemctl cat fail2ban.service fail2ban.socket 2>/dev/null | grep RuntimeDirectory
+```
+
+If `RuntimeDirectory=fail2ban` appears without `RuntimeDirectoryPreserve=yes`, keep the directory across restarts with a drop-in (`systemctl edit fail2ban.service`, and `systemctl edit fail2ban.socket` with a `[Socket]` section if that unit exists), then restart the Fail2Ban UI container once:
+
+```ini
+[Service]
+RuntimeDirectoryPreserve=yes
+```
 
 ```bash
 # RHEL / Rocky / AlmaLinux:
@@ -334,6 +347,17 @@ With `norestored = 1`, Fail2Ban skips `actionban` and `actionunban` for ban even
 * Bans created *after* the last restart, and unbanned *without* another restart in between, go through the normal action pipeline. For those, ban and unban callbacks behave as expected.
 
 The symptom "unban works, but the UI only records unbans for *new* blocks" therefore matches `norestored = 1` combined with a Fail2Ban restart between the original ban and the unban.
+
+### The Logs button stays grey
+
+The **Logs** button shows the log lines that the ban action sent with the event. The action collects them on the Fail2Ban host at the moment of the ban. It searches the jail's `logpath` for the banned IP, newest lines first and up to `grepmax` lines (default 200). If that finds nothing, it searches the systemd journal of the last day. Fail2Ban UI does not read log files for this, so mounting logs into the Fail2Ban UI container does not change it.
+
+The button stays grey when an event arrived without log lines, for example:
+
+* The jail calls `ui-custom-action` directly without a `logpath`. The action then searches `/dev/null`. Use `action = %(action_mwlg)s`, which passes the jail's log path, or pass it yourself: `ui-custom-action[logpath="%(logpath)s"]`.
+* The jail reads the systemd journal (`backend = systemd`), but the Fail2Ban host or container has no `journalctl` or no access to the journal.
+
+Events that were stored without log lines keep a grey button. A fix applies to new bans.
 
 ## Alert provider issues
 
