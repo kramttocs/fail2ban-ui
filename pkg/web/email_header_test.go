@@ -80,3 +80,13 @@ func TestEmailTemplatesEscapeUntrustedContent(t *testing.T) {
 		})
 	}
 }
+
+func TestLOTREmailAvoidsUnsupportedCSS(t *testing.T) {
+	t.Parallel()
+	body := buildLOTREmailBody("title", "headline", "intro", []emailDetail{{Label: "label", Value: "value"}}, "", "", "whois", "logs", "footer")
+	for _, unsupported := range []string{"::before", "::after", "@keyframes", "animation", "position:"} {
+		if strings.Contains(body, unsupported) {
+			t.Errorf("email uses %q, which common mail clients drop", unsupported)
+		}
+	}
+}

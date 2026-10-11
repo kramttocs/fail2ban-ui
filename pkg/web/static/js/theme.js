@@ -37,6 +37,7 @@ function syncFavicons(theme) {
 
 function syncSystemTheme() {
   if (document.body && document.body.classList.contains('lotr-mode')) {
+    applyTheme('dark');
     return;
   }
   applyTheme(getSystemTheme());

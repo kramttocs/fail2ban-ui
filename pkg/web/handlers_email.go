@@ -452,91 +452,82 @@ func buildLOTREmailBody(title, headline, intro string, details []emailDetail, wh
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="color-scheme" content="dark">
+  <meta name="supported-color-schemes" content="dark">
   <title>%s</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { margin:0; padding:0; background: linear-gradient(135deg, #0d2818 0%%, #1a4d2e 50%%, #2d0a4f 100%%); font-family: Georgia, "Times New Roman", serif; color:#f4e8d0; line-height:1.6; -webkit-font-smoothing:antialiased; }
-    .email-wrapper { width:100%%; padding:20px 10px; background: linear-gradient(135deg, #0d2818 0%%, #1a4d2e 50%%, #2d0a4f 100%%); }
-    .email-container { max-width:640px; margin:0 auto; background:#f4e8d0; border:4px solid #d4af37; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.6), inset 0 0 40px rgba(212,175,55,0.1); overflow:hidden; position:relative; }
-    .email-container::before { content:''; position:absolute; top:0; left:0; right:0; bottom:0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139,115,85,0.03) 2px, rgba(139,115,85,0.03) 4px); pointer-events:none; }
-    .email-header { background: linear-gradient(180deg, #c1121f 0%%, #ff6b35 30%%, #d4af37 70%%, #1a4d2e 100%%); color:#ffffff; padding:40px 28px; text-align:center; position:relative; overflow:hidden; }
-    .email-header::before { content:''; position:absolute; top:0; left:0; right:0; bottom:0; background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%%, transparent 70%%); animation: fireFlicker 3s ease-in-out infinite; }
-    @keyframes fireFlicker { 0%%,100%% { opacity:0.6; } 50%% { opacity:1; } }
-    .email-header-brand { margin:0 0 12px; font-size:12px; letter-spacing:0.4em; text-transform:uppercase; opacity:0.9; font-weight:600; font-family:'Cinzel', serif; position:relative; z-index:1; }
-    .email-header-title { margin:20px 0; font-size:42px; font-weight:700; line-height:1.1; text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(255,107,53,0.6), 0 0 60px rgba(193,18,31,0.4); font-family:'Cinzel', serif; letter-spacing:0.1em; position:relative; z-index:1; animation: textGlow 2s ease-in-out infinite; }
-    @keyframes textGlow { 0%%,100%% { text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(255,107,53,0.6), 0 0 60px rgba(193,18,31,0.4); } 50%% { text-shadow: 0 0 30px rgba(255,255,255,1), 0 0 60px rgba(255,107,53,0.8), 0 0 90px rgba(193,18,31,0.6); } }
-    .ring-divider { text-align:center; margin:30px 0; position:relative; }
-    .ring-divider::before { content:'⚔'; position:absolute; left:20%%; top:50%%; transform:translateY(-50%%); font-size:24px; color:#d4af37; background:#f4e8d0; padding:0 15px; }
-    .ring-divider::after { content:'⚔'; position:absolute; right:20%%; top:50%%; transform:translateY(-50%%); font-size:24px; color:#d4af37; background:#f4e8d0; padding:0 15px; }
-    .ring-divider-line { height:3px; background:linear-gradient(90deg, transparent 0%%, #d4af37 20%%, #d4af37 80%%, transparent 100%%); margin:0 25%%; }
-    .email-body { padding:36px 28px; background:#f4e8d0; color:#3d2817; }
-    .email-intro { font-size:18px; line-height:1.8; margin:0 0 28px; color:#3d2817; font-style:italic; text-align:center; }
-    .email-details-wrapper { background:#e8d5b7; border:3px solid #8b7355; border-radius:8px; padding:24px; margin:0 0 32px; box-shadow:inset 0 2px 4px rgba(0,0,0,0.1); }
-    .email-details-wrapper p { margin:12px 0; font-size:15px; line-height:1.7; color:#3d2817; }
+    body { margin:0; padding:0; background-color:#0b0c09; color:#ece2c6; font-family:Georgia, "Times New Roman", serif; line-height:1.6; -webkit-font-smoothing:antialiased; }
+    .email-wrapper { width:100%%; padding:24px 10px; background-color:#0b0c09; }
+    .email-container { max-width:640px; margin:0 auto; background-color:#14160f; border:1px solid #6b5a2e; border-radius:6px; overflow:hidden; text-align:left; }
+    .email-header { background-color:#110f09; background-image:linear-gradient(180deg, #221c0f 0%%, #0f0d08 100%%); padding:34px 28px 28px; text-align:center; border-bottom:1px solid #3d3420; }
+    .email-header-brand { margin:0 0 14px; font-size:11px; letter-spacing:0.45em; text-transform:uppercase; color:#c9a24d; font-family:Cinzel, "Trajan Pro", Georgia, serif; }
+    .email-ornament { margin:0; font-size:14px; letter-spacing:0.3em; color:#8a6a24; font-family:Georgia, serif; }
+    .email-header-title { margin:14px 0; font-size:34px; font-weight:700; line-height:1.15; letter-spacing:0.12em; color:#e6c779; text-shadow:0 0 18px rgba(230,199,121,0.35); font-family:Cinzel, "Trajan Pro", Georgia, serif; }
+    .email-body { padding:34px 28px; background-color:#14160f; color:#ece2c6; }
+    .email-intro { margin:0 0 26px; font-size:17px; line-height:1.75; font-style:italic; text-align:center; color:#ece2c6; }
+    .email-details-wrapper { background-color:#0f110c; border:1px solid #3d3420; border-left:3px solid #c9a24d; border-radius:4px; padding:20px 22px; margin:0 0 30px; }
+    .email-details-wrapper p { margin:10px 0; font-size:15px; line-height:1.6; color:#ece2c6; }
     .email-details-wrapper p:first-child { margin-top:0; }
     .email-details-wrapper p:last-child { margin-bottom:0; }
-    .email-detail-label { font-weight:700; color:#1a4d2e; margin-right:8px; font-family:'Cinzel', serif; }
-    .email-section { margin:36px 0 0; }
-    .email-section-title { font-size:16px; text-transform:uppercase; letter-spacing:0.2em; color:#1a4d2e; margin:0 0 16px; font-weight:700; font-family:'Cinzel', serif; border-bottom:2px solid #d4af37; padding-bottom:8px; }
-    .email-terminal { background:#1a1a1a; color:#d4af37; padding:20px; font-family:"Courier New", Courier, monospace; border-radius:8px; font-size:13px; line-height:1.7; white-space:pre-wrap; word-break:break-word; overflow-x:auto; margin:0; border:2px solid #8b7355; box-shadow:inset 0 0 20px rgba(212,175,55,0.1); }
-    .email-log-stack { background:#0f0f0f; border-radius:8px; padding:16px; border:2px solid #8b7355; }
-    .email-log-line { font-family:"Courier New", Courier, monospace; font-size:12px; line-height:1.6; color:#d4af37; padding:8px 12px; border-radius:6px; margin:0 0 6px; background:rgba(212,175,55,0.1); border-left:3px solid #d4af37; }
+    .email-detail-label { font-weight:700; color:#e6c779; margin-right:6px; font-family:Cinzel, "Trajan Pro", Georgia, serif; }
+    .email-section { margin:30px 0 0; }
+    .email-section-title { margin:0 0 14px; padding-bottom:8px; font-size:13px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:#c9a24d; border-bottom:1px solid #3d3420; font-family:Cinzel, "Trajan Pro", Georgia, serif; }
+    .email-terminal { margin:0; padding:16px 18px; background-color:#080907; color:#e3d9bd; border:1px solid #3d3420; border-radius:4px; font-family:"Courier New", Courier, monospace; font-size:12px; line-height:1.65; white-space:pre-wrap; word-break:break-word; overflow-x:auto; }
+    .email-log-stack { padding:12px; background-color:#080907; border:1px solid #3d3420; border-radius:4px; }
+    .email-log-line { margin:0 0 6px; padding:7px 10px; background-color:#11130e; color:#d9cfb2; border-left:2px solid #6b5a2e; border-radius:3px; font-family:"Courier New", Courier, monospace; font-size:12px; line-height:1.55; word-break:break-word; }
     .email-log-line:last-child { margin-bottom:0; }
-    .email-log-line-alert { background:rgba(193,18,31,0.3); color:#ff6b35; border-left-color:#c1121f; }
-    .email-muted { color:#8b7355; font-size:14px; line-height:1.6; font-style:italic; }
-    .email-footer { border-top:3px solid #d4af37; padding:24px 28px; font-size:13px; color:#3d2817; text-align:center; background:#e8d5b7; font-family:'Cinzel', serif; }
-    .email-footer-text { margin:0 0 8px; font-weight:600; }
-    .email-footer-copyright { margin:0; font-size:11px; color:#8b7355; }
-    .email-header a { color:#ffffff !important; text-decoration:underline; }
-    .email-header a:hover { color:#f4e8d0 !important; }
-    a { color:#1a4d2e; text-decoration:none; }
-    a:hover { color:#2d0a4f; text-decoration:underline; }
+    .email-log-line-alert { background-color:#2a110c; color:#ffb08a; border-left-color:#d9481f; }
+    .email-muted { margin:0; color:#a99d82; font-size:14px; line-height:1.6; font-style:italic; }
+    .email-footer { padding:24px 28px; background-color:#0f110c; border-top:1px solid #3d3420; text-align:center; }
+    .email-footer-text { margin:0 0 8px; font-size:13px; font-weight:600; letter-spacing:0.06em; color:#c9a24d; font-family:Cinzel, "Trajan Pro", Georgia, serif; }
+    .email-footer-copyright { margin:0; font-size:11px; color:#7c7461; }
+    a { color:#e6c779; text-decoration:underline; }
     @media only screen and (max-width:600px) {
-      .email-wrapper { padding:12px 8px; }
-      .email-header { padding:30px 20px; }
-      .email-header-title { font-size:32px; }
-      .email-body { padding:28px 20px; }
+      .email-wrapper { padding:12px 6px; }
+      .email-header { padding:28px 18px 22px; }
+      .email-header-title { font-size:26px; letter-spacing:0.08em; }
+      .email-body { padding:26px 18px; }
       .email-intro { font-size:16px; }
-      .email-details-wrapper { padding:20px; }
-      .email-footer { padding:20px 16px; }
-    }
-    @media only screen and (max-width:480px) {
-      .email-header-title { font-size:28px; }
-      .email-body { padding:24px 16px; }
       .email-details-wrapper { padding:16px; }
+      .email-footer { padding:20px 16px; }
     }
   </style>
 </head>
-<body>
-  <div class="email-wrapper">
-    <div class="email-container">
-      <div class="email-header">
-        <p class="email-header-brand">Middle-earth Security</p>
-        <h1 class="email-header-title">%s</h1>
-        <div class="ring-divider">
-          <div class="ring-divider-line"></div>
+<body bgcolor="#0b0c09">
+  <table role="presentation" width="100%%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0b0c09">
+    <tr>
+      <td align="center" bgcolor="#0b0c09">
+        <div class="email-wrapper">
+          <div class="email-container">
+            <div class="email-header">
+              <p class="email-header-brand">Middle-earth Security</p>
+              <p class="email-ornament">&#10022; &#9472;&#9472;&#9472; &#10070; &#9472;&#9472;&#9472; &#10022;</p>
+              <h1 class="email-header-title">%s</h1>
+              <p class="email-ornament">&#10022; &#9472;&#9472;&#9472; &#10070; &#9472;&#9472;&#9472; &#10022;</p>
+            </div>
+            <div class="email-body">
+              <p class="email-intro">%s</p>
+              <div class="email-details-wrapper">
+                %s
+              </div>
+              <div class="email-section">
+                <p class="email-section-title">%s</p>
+                %s
+              </div>
+              <div class="email-section">
+                <p class="email-section-title">%s</p>
+                %s
+              </div>
+            </div>
+            <div class="email-footer">
+              <p class="email-footer-text">%s</p>
+              <p class="email-footer-copyright">&copy; %s Swissmakers GmbH. All rights reserved.</p>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="email-body">
-        <p class="email-intro">%s</p>
-        <div class="email-details-wrapper">
-          %s
-        </div>
-        <div class="email-section">
-          <p class="email-section-title">%s</p>
-          %s
-        </div>
-        <div class="email-section">
-          <p class="email-section-title">%s</p>
-          %s
-        </div>
-      </div>
-      <div class="email-footer">
-        <p class="email-footer-text">%s</p>
-        <p class="email-footer-copyright">© %s Swissmakers GmbH. All rights reserved.</p>
-      </div>
-    </div>
-  </div>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>`, html.EscapeString(title), html.EscapeString(headline), html.EscapeString(intro), detailRows, html.EscapeString(whoisTitle), whoisHTML, html.EscapeString(logsTitle), logsHTML, html.EscapeString(footerText), year)
 }
